@@ -1,0 +1,86 @@
+basePath: /
+definitions:
+  internal_handler_http.shortenRequest:
+    properties:
+      url:
+        example: https://www.example.com/some/long/path
+        type: string
+    required:
+    - url
+    type: object
+  internal_handler_http.shortenResponse:
+    properties:
+      short_url:
+        example: http://localhost:8080/abc123
+        type: string
+    type: object
+info:
+  contact: {}
+  description: A simple URL shortener service built with Go, Gin, and PostgreSQL.
+  title: SlugGo API
+  version: "1.0"
+paths:
+  /{hash}:
+    get:
+      description: Given a short hash, redirects to the associated long URL.
+      parameters:
+      - description: Short URL hash
+        in: path
+        name: hash
+        required: true
+        type: string
+      responses:
+        "301":
+          description: Redirect
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Redirect to the original URL
+      tags:
+      - URL
+  /shorten:
+    post:
+      consumes:
+      - application/json
+      description: Accepts a long URL and returns a shortened version.
+      parameters:
+      - description: URL to shorten
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler_http.shortenRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_handler_http.shortenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Shorten a long URL
+      tags:
+      - URL
+schemes:
+- http
+swagger: "2.0"
