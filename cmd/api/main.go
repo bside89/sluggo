@@ -45,10 +45,9 @@ func main() {
 	r := gin.Default()
 	httphandler.RegisterRoutes(r, urlHandler)
 
+	log.Printf("swagger docs available at %s/swagger/index.html", cfg.AppBaseURL)
 	log.Printf("server listening on :%s", cfg.AppPort)
 	if err := r.Run(":" + cfg.AppPort); err != nil {
 		log.Fatalf("starting server: %v", err)
 	}
-
-	log.Printf("swagger docs available at %s/swagger/index.html", cfg.AppBaseURL)
 }

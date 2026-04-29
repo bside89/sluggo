@@ -8,6 +8,9 @@ set -e
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+echo "==> Copying .env.local to .env..."
+cp .env.local .env
+
 echo "==> Starting PostgreSQL container..."
 docker compose up -d postgres
 

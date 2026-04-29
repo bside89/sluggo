@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# Project binary
+sluggo
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -26,6 +29,8 @@ go.work.sum
 
 # env file
 .env
+.env.local
+.env.prod
 
 # Editor/IDE
 # .idea/

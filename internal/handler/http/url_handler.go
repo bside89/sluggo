@@ -18,7 +18,13 @@ type URLHandler struct {
 	uc *usecase.URLUseCase
 }
 
+// NewURLHandler creates a URLHandler with the given use case.
+func NewURLHandler(uc *usecase.URLUseCase) *URLHandler {
+	return &URLHandler{uc: uc}
+}
+
 func init() {
+	// Register custom validation functions for request binding.
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("http_url", validateHTTPURL)
 	}
@@ -59,47 +65,6 @@ func (h *URLHandler) Shorten(c *gin.Context) {
 	c.JSON(http.StatusCreated, shortenResponse{ShortURL: shortURL})
 }
 
-// NewURLHandler creates a URLHandler with the given use case.
-func NewURLHandler(uc *usecase.URLUseCase) *URLHandler {
-	return &URLHandler{uc: uc}
-}
-
-func shortenRequestBindError(err error) string {
-	var validationErrs validator.ValidationErrors
-	if !errors.As(err, &validationErrs) {
-		return "invalid request body"
-	}
-
-	for _, validationErr := range validationErrs {
-		if validationErr.StructField() != "URL" {
-			continue
-		}
-
-		switch validationErr.Tag() {
-		case "required":
-			return "field 'url' is required"
-		case "http_url":
-			return "field 'url' must be a valid URL"
-		}
-	}
-
-	return "invalid request body"
-}
-
-func validateHTTPURL(fl validator.FieldLevel) bool {
-	rawURL := fl.Field().String()
-	parsedURL, err := url.ParseRequestURI(rawURL)
-	if err != nil {
-		return false
-	}
-
-	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
-		return false
-	}
-
-	return parsedURL.Host != ""
-}
-
 // Redirect godoc
 // @Summary 	Redirect to the original URL
 // @Description Given a short hash, redirects to the associated long URL.
@@ -123,4 +88,42 @@ func (h *URLHandler) Redirect(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusMovedPermanently, longURL)
+}
+
+// shortenRequestBindError translates JSON binding and validation errors into user-friendly messages.
+func shortenRequestBindError(err error) string {
+	var validationErrs validator.ValidationErrors
+	if !errors.As(err, &validationErrs) {
+		return "invalid request body"
+	}
+
+	for _, validationErr := range validationErrs {
+		if validationErr.StructField() != "URL" {
+			continue
+		}
+
+		switch validationErr.Tag() {
+		case "required":
+			return "field 'url' is required"
+		case "http_url":
+			return "field 'url' must be a valid URL"
+		}
+	}
+
+	return "invalid request body"
+}
+
+// validateHTTPURL is a custom validator function that checks if a string is a valid HTTP or HTTPS URL.
+func validateHTTPURL(fl validator.FieldLevel) bool {
+	rawURL := fl.Field().String()
+	parsedURL, err := url.ParseRequestURI(rawURL)
+	if err != nil {
+		return false
+	}
+
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return false
+	}
+
+	return parsedURL.Host != ""
 }
