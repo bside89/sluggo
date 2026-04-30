@@ -36,6 +36,13 @@ DB_PASSWORD=your_password
 HASH_SECRET_KEY=any_random_string
 ```
 
+**Important:** if running local, don't forget to do the following change, else the application will not work:
+
+```
+DB_HOST=localhost
+REDIS_HOST=localhost
+```
+
 **2. Start the app:**
 
 ```bash
@@ -49,6 +56,22 @@ The API will be at `http://localhost:8080`.
 ## Running with Docker
 
 To build and run everything (app + database + cache) as containers:
+
+**1. Copy the example env file:**
+
+```bash
+cp .env.example .env.prod
+```
+
+Open `.env.prod` and fill in at minimum:
+
+```
+DB_USER=your_user
+DB_PASSWORD=your_password
+HASH_SECRET_KEY=any_random_string
+```
+
+**2. Start the app:**
 
 ```bash
 make prod
