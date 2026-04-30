@@ -1,8 +1,12 @@
 package usecase
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"log"
 	"net/url"
+	"time"
 
 	"sluggo/internal/domain"
 )
@@ -14,14 +18,16 @@ type Encoder interface {
 
 // URLUseCase contains the application business logic for URL shortening.
 type URLUseCase struct {
-	repo    domain.URLRepository
-	encoder Encoder
-	baseURL string
+	repo     domain.URLRepository
+	cache    domain.URLCache
+	encoder  Encoder
+	baseURL  string
+	cacheTTL time.Duration
 }
 
-// New creates a URLUseCase wired with the given repository, encoder and base URL.
-func New(repo domain.URLRepository, encoder Encoder, baseURL string) *URLUseCase {
-	return &URLUseCase{repo: repo, encoder: encoder, baseURL: baseURL}
+// New creates a URLUseCase wired with the given repository, cache, encoder, base URL and cache TTL.
+func New(repo domain.URLRepository, cache domain.URLCache, encoder Encoder, baseURL string, cacheTTL time.Duration) *URLUseCase {
+	return &URLUseCase{repo: repo, cache: cache, encoder: encoder, baseURL: baseURL, cacheTTL: cacheTTL}
 }
 
 // ShortenURL validates rawURL, encodes a Snowflake ID into a short hash,
@@ -48,12 +54,29 @@ func (uc *URLUseCase) ShortenURL(rawURL string) (string, error) {
 }
 
 // ResolveURL returns the long URL associated with the given hash.
+// It applies the cache-aside pattern: checks the cache first, falls back to the
+// database on a miss, and populates the cache with the result.
 // Returns domain.ErrNotFound when the hash does not exist.
 func (uc *URLUseCase) ResolveURL(hash string) (string, error) {
+	ctx := context.Background()
+
+	longURL, err := uc.cache.Get(ctx, hash)
+	if err == nil {
+		return longURL, nil
+	}
+	if !errors.Is(err, domain.ErrNotFound) {
+		log.Printf("cache get error for hash %q: %v — falling back to database", hash, err)
+	}
+
 	entity, err := uc.repo.FindByHash(hash)
 	if err != nil {
 		return "", err
 	}
+
+	if err := uc.cache.Set(ctx, hash, entity.LongURL, uc.cacheTTL); err != nil {
+		log.Printf("cache set error for hash %q: %v", hash, err)
+	}
+
 	return entity.LongURL, nil
 }
 

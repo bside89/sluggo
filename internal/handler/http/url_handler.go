@@ -70,7 +70,7 @@ func (h *URLHandler) Shorten(c *gin.Context) {
 // @Description Given a short hash, redirects to the associated long URL.
 // @Tags 		URL
 // @Param 		hash path string true "Short URL hash"
-// @Success 	301 "Redirect"
+// @Success 	302 "Redirect"
 // @Failure 	404 {object} map[string]string "Not Found"
 // @Failure 	500 {object} map[string]string "Internal Server Error"
 // @Router 		/{hash} [get]
@@ -87,7 +87,7 @@ func (h *URLHandler) Redirect(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusMovedPermanently, longURL)
+	c.Redirect(http.StatusFound, longURL)
 }
 
 // shortenRequestBindError translates JSON binding and validation errors into user-friendly messages.

@@ -19,4 +19,5 @@ docs:
 	@bash ./scripts/update-swagger.sh
 
 build:
-	@go build -o sluggo cmd/api/main.go
+	@mkdir -p bin
+	@go build -o bin/sluggo ./cmd/api

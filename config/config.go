@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -20,6 +21,10 @@ type Config struct {
 	DBSSLMode     string
 	HashSecretKey string
 	SnowflakeNode int64
+	RedisHost     string
+	RedisPort     string
+	RedisPassword string
+	CacheTTL      time.Duration
 }
 
 // Load reads the .env file (if present) and builds a Config from env vars.
@@ -30,6 +35,11 @@ func Load() (*Config, error) {
 	node, err := strconv.ParseInt(getEnv("SNOWFLAKE_NODE", "1"), 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("invalid SNOWFLAKE_NODE value: %w", err)
+	}
+
+	cacheTTL, err := time.ParseDuration(getEnv("CACHE_TTL", "24h"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid CACHE_TTL value: %w", err)
 	}
 
 	return &Config{
@@ -43,7 +53,16 @@ func Load() (*Config, error) {
 		DBSSLMode:     getEnv("DB_SSLMODE", "disable"),
 		HashSecretKey: getEnv("HASH_SECRET_KEY", ""),
 		SnowflakeNode: node,
+		RedisHost:     getEnv("REDIS_HOST", "localhost"),
+		RedisPort:     getEnv("REDIS_PORT", "6379"),
+		RedisPassword: getEnv("REDIS_PASSWORD", ""),
+		CacheTTL:      cacheTTL,
 	}, nil
+}
+
+// RedisAddr returns the Redis address in host:port format.
+func (c *Config) RedisAddr() string {
+	return fmt.Sprintf("%s:%s", c.RedisHost, c.RedisPort)
 }
 
 // DSN returns the PostgreSQL connection string.

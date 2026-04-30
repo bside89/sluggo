@@ -84,7 +84,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "301": {
+                    "302": {
                         "description": "Redirect"
                     },
                     "404": {
@@ -139,7 +139,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
 	BasePath:         "/",
-	Schemes:          []string{"http"},
+	Schemes:          []string{"http,", "https"},
 	Title:            "SlugGo API",
 	Description:      "A simple URL shortener service built with Go, Gin, and PostgreSQL.",
 	InfoInstanceName: "swagger",

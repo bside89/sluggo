@@ -6,7 +6,9 @@ import (
 	"sluggo/config"
 	docs "sluggo/docs"
 	httphandler "sluggo/internal/handler/http"
+	infracache "sluggo/internal/infrastructure/cache"
 	"sluggo/internal/infrastructure/database"
+	cacherepo "sluggo/internal/repository/cache"
 	postgresrepo "sluggo/internal/repository/postgres"
 	"sluggo/internal/usecase"
 	"sluggo/pkg/shortener"
@@ -39,7 +41,9 @@ func main() {
 	}
 
 	repo := postgresrepo.New(db)
-	uc := usecase.New(repo, enc, cfg.AppBaseURL)
+	redisClient := infracache.Connect(cfg)
+	cache := cacherepo.New(redisClient)
+	uc := usecase.New(repo, cache, enc, cfg.AppBaseURL, cfg.CacheTTL)
 	urlHandler := httphandler.NewURLHandler(uc)
 
 	r := gin.Default()

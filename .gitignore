@@ -9,7 +9,10 @@
 *.dylib
 
 # Project binary
+bin/
 sluggo
+api
+__debug_*
 
 # Test binary, built with `go test -c`
 *.test

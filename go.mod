@@ -6,12 +6,18 @@ require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/joho/godotenv v1.5.1
+	github.com/redis/go-redis/v9 v9.19.0
 	github.com/speps/go-hashids/v2 v2.0.1
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
+)
+
+require (
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 )
 
 require (
