@@ -18,7 +18,7 @@ echo "==> Waiting for PostgreSQL and Redis to become healthy..."
 until docker compose exec -T postgres pg_isready -U "${DB_USER:-sluggo}" -d "${DB_NAME:-sluggo}" > /dev/null 2>&1; do
   sleep 1
 done
-until docker exec $(compose_cmd ps -q redis) redis-cli ping > /dev/null 2>&1; do
+until docker exec $(docker compose ps -q redis) redis-cli ping > /dev/null 2>&1; do
   sleep 1
 done
 

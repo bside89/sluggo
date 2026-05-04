@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"time"
 
 	"sluggo/config"
@@ -24,7 +24,8 @@ func Connect(cfg *config.Config) *redis.Client {
 	defer cancel()
 
 	if err := client.Ping(ctx).Err(); err != nil {
-		log.Printf("warning: could not connect to Redis at %s: %v — cache disabled, falling back to database", cfg.RedisAddr(), err)
+		slog.Warn("warning: could not connect to Redis — cache disabled, falling back to database",
+			slog.String("addr", cfg.RedisAddr()), slog.Any("error", err))
 	}
 
 	return client

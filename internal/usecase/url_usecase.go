@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/url"
 	"time"
 
@@ -27,7 +27,13 @@ type URLUseCase struct {
 
 // New creates a URLUseCase wired with the given repository, cache, encoder, base URL and cache TTL.
 func New(repo domain.URLRepository, cache domain.URLCache, encoder Encoder, baseURL string, cacheTTL time.Duration) *URLUseCase {
-	return &URLUseCase{repo: repo, cache: cache, encoder: encoder, baseURL: baseURL, cacheTTL: cacheTTL}
+	return &URLUseCase{
+		repo:     repo,
+		cache:    cache,
+		encoder:  encoder,
+		baseURL:  baseURL,
+		cacheTTL: cacheTTL,
+	}
 }
 
 // ShortenURL validates rawURL, encodes a Snowflake ID into a short hash,
@@ -47,6 +53,7 @@ func (uc *URLUseCase) ShortenURL(rawURL string) (string, error) {
 		LongURL: rawURL,
 	}
 	if err := uc.repo.Save(entity); err != nil {
+		slog.Error("persisting url", slog.String("hash", hash), slog.Any("error", err))
 		return "", fmt.Errorf("persisting url: %w", err)
 	}
 
@@ -65,7 +72,8 @@ func (uc *URLUseCase) ResolveURL(hash string) (string, error) {
 		return longURL, nil
 	}
 	if !errors.Is(err, domain.ErrNotFound) {
-		log.Printf("cache get error for hash %q: %v — falling back to database", hash, err)
+		slog.Error("cache get error — falling back to database",
+			slog.String("hash", hash), slog.Any("error", err))
 	}
 
 	entity, err := uc.repo.FindByHash(hash)
@@ -74,7 +82,8 @@ func (uc *URLUseCase) ResolveURL(hash string) (string, error) {
 	}
 
 	if err := uc.cache.Set(ctx, hash, entity.LongURL, uc.cacheTTL); err != nil {
-		log.Printf("cache set error for hash %q: %v", hash, err)
+		slog.Error("cache set error",
+			slog.String("hash", hash), slog.Any("error", err))
 	}
 
 	return entity.LongURL, nil
