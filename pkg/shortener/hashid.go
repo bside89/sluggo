@@ -1,3 +1,6 @@
+// Package shortener provides a Shortener type that generates unique, collision-free
+// short codes by encoding Snowflake IDs with the hashids algorithm (Base62 + secret
+// salt).
 package shortener
 
 import (

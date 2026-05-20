@@ -1,3 +1,5 @@
+// Package domain defines the core business entities and interfaces for the URL
+// shortening service.
 package domain
 
 import (

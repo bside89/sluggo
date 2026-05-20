@@ -1,3 +1,5 @@
+// Package logger provides a function to set up the global slog logger based on the
+// application environment.
 package logger
 
 import (

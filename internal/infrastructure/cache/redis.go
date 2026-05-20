@@ -1,3 +1,4 @@
+// Package cache provides caching mechanisms for the URL shortening service.
 package cache
 
 import (

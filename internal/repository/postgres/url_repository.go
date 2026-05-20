@@ -1,3 +1,4 @@
+// Package postgresrepo provides a PostgreSQL implementation of the URL repository.
 package postgresrepo
 
 import (

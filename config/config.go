@@ -1,3 +1,5 @@
+// Package config provides a centralized way to load and access application settings
+// from environment variables.
 package config
 
 import (

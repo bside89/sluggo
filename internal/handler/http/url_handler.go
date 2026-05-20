@@ -1,3 +1,4 @@
+// Package httphandler provides HTTP handlers for the URL shortening service.
 package httphandler
 
 import (

@@ -1,3 +1,5 @@
+// Package database provides database connectivity and operations for the URL
+// shortening service.
 package database
 
 import (
